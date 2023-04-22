@@ -4,55 +4,72 @@ USE ieee.numeric_std.ALL;
 
 PACKAGE common_functions_pkg IS
 
-    FUNCTION reduce_or(x  : std_logic_vector) return std_logic;
-    FUNCTION reduce_xor(x : std_logic_vector) return std_logic;
-    FUNCTION reduce_and(x : std_logic_vector) return std_logic;
-    FUNCTION bit_reverse(x: std_logic_vector) return std_logic_vector;
+  FUNCTION reduce_or(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC;
+  FUNCTION reduce_xor(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC;
+  FUNCTION reduce_and(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC;
+  FUNCTION bit_reverse(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC_VECTOR;
+  FUNCTION vector_xor(x : STD_LOGIC_VECTOR; y : STD_LOGIC_VECTOR) RETURN STD_LOGIC_VECTOR;
+  FUNCTION clog2(x : INTEGER) RETURN INTEGER;
 
 END PACKAGE;
 
 PACKAGE BODY common_functions_pkg IS
 
-    FUNCTION reduce_or(x  : std_logic_vector) return std_logic is
-      variable tmp: std_logic_vector(x'length-1 downto 0) := (others => '0');
-      BEGIN
-        if(x = tmp) then
-          return '0';
-        else
-          return '1';
-        end if;
-    end function;
+  FUNCTION reduce_or(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC IS
+    VARIABLE tmp : STD_LOGIC_VECTOR(x'length - 1 DOWNTO 0) := (OTHERS => '0');
+  BEGIN
+    IF (x = tmp) THEN
+      RETURN '0';
+    ELSE
+      RETURN '1';
+    END IF;
+  END FUNCTION;
 
+  FUNCTION reduce_and(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC IS
+    VARIABLE tmp : STD_LOGIC_VECTOR(x'length - 1 DOWNTO 0) := (OTHERS => '1');
+  BEGIN
+    IF (x = tmp) THEN
+      RETURN '1';
+    ELSE
+      RETURN '0';
+    END IF; END FUNCTION;
 
+    FUNCTION reduce_xor(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC IS
+      VARIABLE tmp : STD_LOGIC := '0';
+    BEGIN
+      tmp := '0';
+      FOR i IN 0 TO x'length - 1 LOOP
+        tmp := tmp XOR x(i);
+      END LOOP;
+      RETURN tmp;
+    END FUNCTION;
 
-    FUNCTION reduce_and(x : std_logic_vector) return std_logic is
-      variable tmp: std_logic_vector(x'length-1 downto 0) := (others => '1');
-      BEGIN
-        if(x = tmp) then
-          return '1';
-        else
-          return '0';
-        end if;    end function;
+    FUNCTION bit_reverse(x : STD_LOGIC_VECTOR) RETURN STD_LOGIC_VECTOR IS
+      VARIABLE tmp : STD_LOGIC_VECTOR(x'length - 1 DOWNTO 0);
 
-    FUNCTION reduce_xor(x : std_logic_vector) return std_logic is
-      variable tmp: std_logic := '0';
-      BEGIN
-        tmp := '0';
-        for i in 0 to x'length-1 loop
-          tmp := tmp XOR x(i);
-        end loop;
-      return tmp;
-    end function;
+    BEGIN
+      FOR i IN 0 TO x'length - 1 LOOP
+        tmp(i) := x(x'length - 1 - i);
+      END LOOP;
+      RETURN tmp;
+    END FUNCTION;
 
-    FUNCTION bit_reverse(x: std_logic_vector) return std_logic_vector is
-      variable tmp: std_logic_vector(x'length-1 downto 0);
+    FUNCTION vector_xor(x : STD_LOGIC_VECTOR; y : STD_LOGIC_VECTOR) RETURN STD_LOGIC_VECTOR IS
+      VARIABLE tmp : STD_LOGIC_VECTOR(x'length - 1 DOWNTO 0);
+    BEGIN
+      FOR i IN 0 TO x'length - 1 LOOP
+        tmp(i) := x(i) XOR y(i);
+      END LOOP;
+      RETURN tmp;
+    END FUNCTION;
 
-      begin
-      for i in 0 to x'length-1 loop
-          tmp(i) := x(x'length-1-i);
-      end loop;
+    FUNCTION clog2(x : INTEGER) RETURN INTEGER IS
+      VARIABLE tmp : INTEGER := 1;
+    BEGIN
+      WHILE 2 ** tmp < x LOOP
+        tmp := tmp + 1;
+      END LOOP;
       return tmp;
     END FUNCTION;
 
-
-END PACKAGE BODY;
+  END PACKAGE BODY;

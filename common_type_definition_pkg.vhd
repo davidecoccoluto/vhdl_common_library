@@ -4,9 +4,11 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-
 package common_type_definition_pkg is
 
+  type array_of_signed is array(natural range <>) of signed;
+  type array_of_unsigned is array(natural range <>) of unsigned;
+  type array_of_slv is array(natural range <>) of std_logic_vector;
  ------------------------------------------
 subtype signed4_t is signed(3 downto 0); 
 subtype signed5_t is signed(4 downto 0); 
