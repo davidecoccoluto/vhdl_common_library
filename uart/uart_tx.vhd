@@ -1,21 +1,7 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 22.04.2023 17:09:23
--- Design Name: 
 -- Module Name: uart_tx - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
+-- Engineer: Davide Coccoluto
+-- Create Date: 22.04.2023 17:09:23
 ----------------------------------------------------------------------------------
 
 

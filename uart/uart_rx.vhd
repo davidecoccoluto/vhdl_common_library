@@ -17,6 +17,7 @@ entity uart_rx is
 
     data_rcv: out std_logic_vector(DATA_N_BIT-1 downto 0);
     parity_error: out std_logic;
+    stop_error: out std_logic;
     data_rcv_valid: out std_logic
    );
 end uart_rx;
@@ -24,11 +25,13 @@ end uart_rx;
 architecture Behavioral of uart_rx is
     constant clk_cnt_top: positive := M_CLK_Hz/BAUD_RATE-1;
 
-    type uart_fsm_t is (WAIT_FOR_START, WAIT_HALF, READ_DATA, READ_PARITY, STOP_BIT);
+    type uart_fsm_t is (WAIT_FOR_START, WAIT_HALF, READ_DATA, READ_PARITY, STOP_BIT, WAIT_FOR_STOP);
     signal uart_fsm: uart_fsm_t;
 
     signal clk_cnt: natural;
     signal data_cnt: natural;
+
+    signal parity_error_internal: std_logic;
 
 begin
     process(clk) begin
@@ -40,8 +43,12 @@ begin
                 data_cnt <= 0;
                 uart_fsm <= WAIT_FOR_START;
                 data_rcv <= (others => '0');
+                stop_error <= '0';
             else
                 clk_cnt <= clk_cnt + 1;
+                parity_error <= '0';
+                stop_error   <= '0';
+                data_rcv_valid <= '0';
                 case uart_fsm is
                     when WAIT_FOR_START=>
                         if uart_rx = '0' then
@@ -68,21 +75,34 @@ begin
                                 clk_cnt <= 0;
                                 uart_fsm <= STOP_BIT;
                                 if uart_rx = xor(data_rcv) then
-                                    data_rcv_valid <= '1';
-                                    parity_error <= '0';
+                                    parity_error_internal <= '0';
                                 else
-                                    data_rcv_valid <= '0';
-                                    parity_error <= '1';
+                                    parity_error_internal <= '1';
                                 end if;
                             end if;
                     when STOP_BIT =>
-                        data_rcv_valid <= '0';
-                        parity_error <= '0';
                     if clk_cnt = clk_cnt_top then
                         clk_cnt <= 0;
                             uart_fsm <= WAIT_FOR_START;
+                            parity_error_internal <= '0';
+                            if(parity_error_internal = '1') then
+                                parity_error <= '1';
+                            end if;
+
+                            if(uart_rx = '0') then
+                                stop_error <= '1';
+                                uart_fsm <= WAIT_FOR_STOP;
+                            end if;
+                        
+                            if(parity_error_internal = '0' and uart_rx = '1') then
+                                data_rcv_valid <= '1';
+                            end if;
                         end if;
-                
+
+                    when WAIT_FOR_STOP =>
+                        if uart_rx = '1' then
+                            uart_fsm <= WAIT_FOR_START;
+                        end if;
                 end case;
             end if;
         end if;
